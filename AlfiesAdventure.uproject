@@ -7,7 +7,10 @@
 		{
 			"Name": "AlfiesAdventure",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	]
 }
