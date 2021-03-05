@@ -1,4 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+/*
+ * Copyright(C) Felix Klose - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Felix Klose <felix.klose@felix-klose.tech>, 2021
+ */
 
 #pragma once
 
@@ -36,7 +41,7 @@ public:
 
 	/** Current Health of the owning character */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AttributeSetBase)
-		FGameplayAttributeData Health;
+	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(UBaseAttributeSet, Health)
 
 	/** Max Health of the owning character */

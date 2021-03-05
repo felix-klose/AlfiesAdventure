@@ -1,10 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+/*
+ * Copyright(C) Felix Klose - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Felix Klose <felix.klose@felix-klose.tech>, 2021
+ */
 
 #include "PlayerAnimInstance.h"
 
 #include "GameFramework/PawnMovementComponent.h"
 
+ /** Initialization method for AnimInsatances */
 void UPlayerAnimInstance::NativeInitializeAnimation()
 {
 	if (Pawn == nullptr)
@@ -13,11 +18,13 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 	}
 }
 
+/** Main update function for AnimInstances */
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	UpdateAnimationProperties();
 }
 
+/** Update attributes used to control animatino */
 void UPlayerAnimInstance::UpdateAnimationProperties()
 {
 	if (Pawn == nullptr)
