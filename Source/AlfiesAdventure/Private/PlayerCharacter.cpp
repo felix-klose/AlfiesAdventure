@@ -76,11 +76,21 @@ UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const
 	return AbilitySystem;
 }
 
-/**
-* Called when the game starts or when spawned
-*/
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Attribute Accessors
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float APlayerCharacter::GetHealth()
+{
+	return AttributeSet->GetHealth();
+}
+
+float APlayerCharacter::GetMaxHealth()
+{
+	return AttributeSet->GetMaxHealth();
+}
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
