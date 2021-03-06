@@ -69,23 +69,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 }
 
 /**
-* Called to bind functionality to input
-*/
-void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::SetForwardMovementInput);
-	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::SetRightMovementInput);
-
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookRight", this, &APawn::AddControllerYawInput);
-}
-
-/**
 * Getter for the ability system component. Necessary for implementation of the IAbilitySystemInterface class
 */
 UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const
@@ -101,28 +84,3 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 }
-
-/**
-* Calculates the current forward directions and calls character movement based on current input
-*/
-void APlayerCharacter::SetForwardMovementInput(float Value)
-{
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation = FRotator(0.0f, Rotation.Yaw, 0.0f);
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-	AddMovementInput(Direction, Value);
-}
-
-/**
-* Calculates the current right directions and calls character movement based on current input
-*/
-void APlayerCharacter::SetRightMovementInput(float Value)
-{
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation = FRotator(0.0f, Rotation.Yaw, 0.0f);
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	AddMovementInput(Direction, Value);
-}
-

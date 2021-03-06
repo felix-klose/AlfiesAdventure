@@ -49,13 +49,6 @@ public:
 	*/
 	virtual void Tick(float DeltaTime) override;
 
-	/** 
-	* Called to bind functionality to input
-	* 
-	* TO-DO: replace with player controller based implementation
-	*/
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	/**
 	* Getter for the ability system component. Necessary for implementation of the IAbilitySystemInterface class
 	*/
@@ -67,14 +60,4 @@ protected:
 	* Called when the game starts or when spawned
 	*/
 	virtual void BeginPlay() override;
-
-	/**
-	* Calculates the current forward directions and calls character movement based on current input
-	*/
-	void SetForwardMovementInput(float Value);
-
-	/**
-	* Calculates the current right directions and calls character movement based on current input
-	*/
-	void SetRightMovementInput(float Value);
 };
