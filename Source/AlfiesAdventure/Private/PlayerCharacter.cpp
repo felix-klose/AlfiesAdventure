@@ -66,6 +66,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// There needs to be a way to do this outside of Tick...
+	if(GetHealth() == 0)
+		this->GetCharacterMovement()->Velocity = FVector::ZeroVector;
 }
 
 /**
@@ -93,4 +96,25 @@ float APlayerCharacter::GetMaxHealth()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AbilitySystem->RefreshAbilityActorInfo();
+	AttributeSet->OnHealthChange.AddDynamic(this, &APlayerCharacter::OnHealthChange);
+}
+
+void APlayerCharacter::OnHealthChange(float CurValue, float MaxValue)
+{
+	// Check for death and enable ragdolls in case
+	if (CurValue <= 0)
+	{
+		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+		GetMesh()->SetSimulatePhysics(true);
+		APlayerController* PlayerController = dynamic_cast<APlayerController*>(GetController());
+		if (PlayerController)
+		{
+			PlayerController->DisableInput(PlayerController);
+
+			this->GetCharacterMovement()->GravityScale = 0.0f;
+			this->GetCharacterMovement()->Velocity = FVector::ZeroVector;
+		}
+	}
 }

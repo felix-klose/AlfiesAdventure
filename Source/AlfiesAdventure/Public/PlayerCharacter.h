@@ -64,6 +64,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetMaxHealth();
 
+	UFUNCTION()
+	void OnHealthChange(float CurValue, float MaxValue);
+
 protected:
 
 	/** 
