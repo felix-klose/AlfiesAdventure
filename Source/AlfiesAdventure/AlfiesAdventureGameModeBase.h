@@ -18,5 +18,16 @@ UCLASS()
 class ALFIESADVENTURE_API AAlfiesAdventureGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void DisablePlayerInput();
+
+	UFUNCTION(BlueprintCallable)
+	void EnablePlayerInput();
+
+	UFUNCTION(BlueprintCallable)
+	void RespawnPlayer();
 	
 };

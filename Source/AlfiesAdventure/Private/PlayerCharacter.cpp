@@ -14,6 +14,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "../AlfiesAdventureGameModeBase.h"
 #include "BaseAttributeSet.h"
 
  // Sets default values for this character's properties
@@ -21,6 +22,7 @@ APlayerCharacter::APlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = false;
 
 	// Don't turn the pawn with camera movement
 	bUseControllerRotationYaw = false;
@@ -51,6 +53,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 	GetCharacterMovement()->JumpZVelocity = 480.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
+	GetCharacterMovement()->GravityScale = 1.0f;
 
 	// Create ability system and attribute set references
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Ability System"));
@@ -107,8 +110,37 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	DefaultMeshTransform = GetMesh()->GetRelativeTransform();
+
 	AbilitySystem->RefreshAbilityActorInfo();
 	AttributeSet->OnHealthChange.AddDynamic(this, &APlayerCharacter::OnHealthChange);
+
+	this->GetCharacterMovement()->GravityScale = 1.0f;
+}
+
+void APlayerCharacter::EnableRagdollMode()
+{
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
+
+	AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->DisablePlayerInput();
+
+	this->GetCharacterMovement()->GravityScale = 0.0f;
+	this->GetCharacterMovement()->Velocity = FVector::ZeroVector;
+}
+
+void APlayerCharacter::DisableRagdollMode()
+{
+	GetMesh()->SetSimulatePhysics(false);
+	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
+
+	AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
+	GameMode->EnablePlayerInput();
+
+	this->GetCharacterMovement()->GravityScale = 1.0f;
+
+	GetMesh()->SetRelativeTransform(DefaultMeshTransform);
 }
 
 void APlayerCharacter::OnHealthChange(float CurValue, float MaxValue)
@@ -116,15 +148,6 @@ void APlayerCharacter::OnHealthChange(float CurValue, float MaxValue)
 	// Check for death and enable ragdolls in case
 	if (CurValue <= 0)
 	{
-		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-		GetMesh()->SetSimulatePhysics(true);
-		APlayerController* PlayerController = dynamic_cast<APlayerController*>(GetController());
-		if (PlayerController)
-		{
-			PlayerController->DisableInput(PlayerController);
-
-			this->GetCharacterMovement()->GravityScale = 0.0f;
-			this->GetCharacterMovement()->Velocity = FVector::ZeroVector;
-		}
+		EnableRagdollMode();
 	}
 }

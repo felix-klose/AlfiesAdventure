@@ -21,12 +21,15 @@ void AAlfiePlayerController::MoveForward(float Speed)
 	if (ControlledCharacter)
 	{
 		// Current Character Forward
-		const FRotator Rotation = ControlledCharacter->Controller->GetControlRotation();
+		const FRotator Rotation = GetControlRotation();
 		const FRotator YawRotation = FRotator(0.f, Rotation.Yaw, 0.f);
 		// Remember: X is forward...
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		ControlledCharacter->AddMovementInput(Direction, Speed);
+		if (Speed > 0)
+		{
+			ControlledCharacter->AddMovementInput(Direction, Speed);
+		}
 	}
 }
 
@@ -40,7 +43,7 @@ void AAlfiePlayerController::MoveRight(float Speed)
 	if (ControlledCharacter)
 	{
 		// Current Character Forward
-		const FRotator Rotation = ControlledCharacter->Controller->GetControlRotation();
+		const FRotator Rotation = GetControlRotation();
 		const FRotator YawRotation = FRotator(0.f, Rotation.Yaw, 0.f);
 		// Remember: Y is right...
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);

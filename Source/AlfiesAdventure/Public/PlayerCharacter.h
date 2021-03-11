@@ -41,6 +41,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Character | Attributes", meta = (AllowPrivateAccess = "true"))
 	class UBaseAttributeSet* AttributeSet;
 
+	FTransform DefaultMeshTransform;
+
 public:	
 	/** 
 	* Main Update function called every frame
@@ -72,6 +74,9 @@ public:
 
 	UFUNCTION()
 	void OnHealthChange(float CurValue, float MaxValue);
+
+	void EnableRagdollMode();
+	void DisableRagdollMode();
 
 protected:
 
