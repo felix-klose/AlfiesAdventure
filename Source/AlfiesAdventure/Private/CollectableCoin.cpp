@@ -14,8 +14,6 @@ ACollectableCoin::ACollectableCoin()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	SetRootComponent(Mesh);
-
-	Mesh->OnComponentBeginOverlap.AddDynamic(this, &ACollectableCoin::OnBeginOverlap);
 }
 
 // Called when the game starts or when spawned
@@ -23,6 +21,7 @@ void ACollectableCoin::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Mesh->OnComponentBeginOverlap.AddDynamic(this, &ACollectableCoin::OnBeginOverlap);
 }
 
 // Called every frame

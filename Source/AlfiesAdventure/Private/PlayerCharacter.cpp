@@ -68,10 +68,6 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// There needs to be a way to do this outside of Tick...
-	if(GetHealth() == 0)
-		this->GetCharacterMovement()->Velocity = FVector::ZeroVector;
 }
 
 /**
@@ -126,8 +122,7 @@ void APlayerCharacter::EnableRagdollMode()
 	AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->DisablePlayerInput();
 
-	this->GetCharacterMovement()->GravityScale = 0.0f;
-	this->GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	GetCharacterMovement()->DisableMovement();
 }
 
 void APlayerCharacter::DisableRagdollMode()
@@ -138,7 +133,7 @@ void APlayerCharacter::DisableRagdollMode()
 	AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
 	GameMode->EnablePlayerInput();
 
-	this->GetCharacterMovement()->GravityScale = 1.0f;
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
 	GetMesh()->SetRelativeTransform(DefaultMeshTransform);
 }
