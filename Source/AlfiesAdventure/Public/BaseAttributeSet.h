@@ -51,13 +51,13 @@ public:
 
 	/** Current Stamina of the owning character */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AttributeSetBase)
-	FGameplayAttributeData Stamina;
-	ATTRIBUTE_ACCESSORS(UBaseAttributeSet, Stamina)
+	FGameplayAttributeData Energy;
+	ATTRIBUTE_ACCESSORS(UBaseAttributeSet, Energy)
 
 	/** Max Stamina of the owning character */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AttributeSetBase)
-	FGameplayAttributeData MaxStamina;
-	ATTRIBUTE_ACCESSORS(UBaseAttributeSet, MaxStamina)
+	FGameplayAttributeData MaxEnergy;
+	ATTRIBUTE_ACCESSORS(UBaseAttributeSet, MaxEnergy)
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// AttributeSet implementation
@@ -77,5 +77,5 @@ public:
 	FOnAttributeChangeDelegate OnHealthChange;
 
 	/** Attribute change delegate for Stamina */
-	FOnAttributeChangeDelegate OnStaminaChange;
+	FOnAttributeChangeDelegate OnEnergyChange;
 };

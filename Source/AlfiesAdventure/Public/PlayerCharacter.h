@@ -64,6 +64,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetMaxHealth();
 
+	UFUNCTION(BlueprintCallable)
+	float GetEnergy();
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxEnergy();
+
 	UFUNCTION()
 	void OnHealthChange(float CurValue, float MaxValue);
 

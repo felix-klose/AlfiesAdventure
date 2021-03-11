@@ -11,7 +11,7 @@
 #include "GameplayEffectExtension.h"
 
  /** Default constructor, initializing attributes with default values */
-UBaseAttributeSet::UBaseAttributeSet() : Health(100.f), MaxHealth(100.f), Stamina(100.f), MaxStamina(100.f)
+UBaseAttributeSet::UBaseAttributeSet() : Health(100.f), MaxHealth(100.f), Energy(100.f), MaxEnergy(100.f)
 {
 }
 
@@ -33,12 +33,12 @@ void UBaseAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 		OnHealthChange.Broadcast(Health.GetCurrentValue(), MaxHealth.GetCurrentValue());
 	}
-	// Clamp Stamina and send attribute change event
-	else if (Data.EvaluatedData.Attribute.GetUProperty() == GetStaminaAttribute().GetUProperty())
+	// Clamp Energy and send attribute change event
+	else if (Data.EvaluatedData.Attribute.GetUProperty() == GetEnergyAttribute().GetUProperty())
 	{
-		Stamina.SetCurrentValue(FMath::Clamp(Stamina.GetCurrentValue(), 0.f, MaxStamina.GetCurrentValue()));
-		Stamina.SetBaseValue(FMath::Clamp(Stamina.GetBaseValue(), 0.f, MaxStamina.GetCurrentValue()));
+		Energy.SetCurrentValue(FMath::Clamp(Energy.GetCurrentValue(), 0.f, MaxEnergy.GetCurrentValue()));
+		Energy.SetBaseValue(FMath::Clamp(Energy.GetBaseValue(), 0.f, MaxEnergy.GetCurrentValue()));
 
-		OnStaminaChange.Broadcast(Stamina.GetCurrentValue(), MaxStamina.GetCurrentValue());
+		OnEnergyChange.Broadcast(Energy.GetCurrentValue(), MaxEnergy.GetCurrentValue());
 	}
 }

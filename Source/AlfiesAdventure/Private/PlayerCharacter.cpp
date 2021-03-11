@@ -93,6 +93,16 @@ float APlayerCharacter::GetMaxHealth()
 	return AttributeSet->GetMaxHealth();
 }
 
+float APlayerCharacter::GetEnergy()
+{
+	return AttributeSet->GetEnergy();
+}
+
+float APlayerCharacter::GetMaxEnergy()
+{
+	return AttributeSet->GetMaxEnergy();
+}
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
