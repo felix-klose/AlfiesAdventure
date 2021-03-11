@@ -21,6 +21,19 @@ class ALFIESADVENTURE_API AAlfiesAdventureGameModeBase : public AGameModeBase
 
 public:
 
+	AAlfiesAdventureGameModeBase();
+
+protected:
+
+	int CoinsCollected;
+
+public:
+
+	void AddCollectedCoins(int Value);
+
+	UFUNCTION(BlueprintCallable)
+	int GetCoinsCollected();
+
 	UFUNCTION(BlueprintCallable)
 	void DisablePlayerInput();
 

@@ -13,6 +13,21 @@
 
 #include "Public/PlayerCharacter.h"
 
+AAlfiesAdventureGameModeBase::AAlfiesAdventureGameModeBase()
+{
+	CoinsCollected = 0;
+}
+
+void AAlfiesAdventureGameModeBase::AddCollectedCoins(int Value)
+{
+	CoinsCollected += Value;
+}
+
+int AAlfiesAdventureGameModeBase::GetCoinsCollected()
+{
+	return CoinsCollected;
+}
+
 void AAlfiesAdventureGameModeBase::DisablePlayerInput()
 {
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);

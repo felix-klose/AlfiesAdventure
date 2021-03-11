@@ -26,10 +26,7 @@ void AAlfiePlayerController::MoveForward(float Speed)
 		// Remember: X is forward...
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		if (Speed > 0)
-		{
-			ControlledCharacter->AddMovementInput(Direction, Speed);
-		}
+		ControlledCharacter->AddMovementInput(Direction, Speed);
 	}
 }
 
