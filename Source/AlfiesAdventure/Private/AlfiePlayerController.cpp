@@ -104,6 +104,16 @@ void AAlfiePlayerController::StopJumping()
 	}
 }
 
+void AAlfiePlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	if (InPawn != nullptr) {
+		// Dynamic casting is safer than just hard-casting. Computational overhead is minimal since
+		// under most circumstances this should only be called once per character / instance
+		ControlledCharacter = dynamic_cast<APlayerCharacter*>(InPawn);
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Utility functions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

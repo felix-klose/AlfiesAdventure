@@ -15,8 +15,7 @@
 
 void AAlfiesAdventureGameModeBase::DisablePlayerInput()
 {
-	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	APlayerController* PlayerController = (APlayerController*) PlayerCharacter->GetController();
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	if (PlayerController)
 	{
@@ -31,8 +30,7 @@ void AAlfiesAdventureGameModeBase::DisablePlayerInput()
 
 void AAlfiesAdventureGameModeBase::EnablePlayerInput()
 {
-	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	APlayerController* PlayerController = (APlayerController*)PlayerCharacter->GetController();
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	if (PlayerController)
 	{
@@ -54,11 +52,8 @@ void AAlfiesAdventureGameModeBase::RespawnPlayer()
 	PlayerPawn->Destroy();
 
 	FTransform SpawnTransform = FindPlayerStart(PlayerController)->GetTransform();
-	APawn* NewPlayer = GetWorld()->SpawnActorDeferred<APawn>(this->DefaultPawnClass, SpawnTransform);
+	APawn* NewPlayer = GetWorld()->SpawnActor<APawn>(this->DefaultPawnClass, SpawnTransform, FActorSpawnParameters());
 	PlayerController->Possess(NewPlayer);
-	NewPlayer->SetOwner(PlayerController);
-	NewPlayer->Controller = PlayerController;
 
 	EnablePlayerInput();
-	NewPlayer->DispatchBeginPlay();
-}
+} 
