@@ -1,18 +1,21 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+/*
+ * Copyright(C) Felix Klose - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Felix Klose <felix.klose@felix-klose.tech>, 2021
+ */
 
-
-#include "SpikeTrap.h"
+#include "ContactTrap.h"
 
 #include "Components/StaticMeshComponent.h"
 #include "AbilitySystemComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-
 // Sets default values
-ASpikeTrap::ASpikeTrap()
+AContactTrap::AContactTrap()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
@@ -22,27 +25,28 @@ ASpikeTrap::ASpikeTrap()
 }
 
 // Called when the game starts or when spawned
-void ASpikeTrap::BeginPlay()
+void AContactTrap::BeginPlay()
 {
 	Super::BeginPlay();
+
 	OnHitAbilitySpec = AbilitySystem->GiveAbility(FGameplayAbilitySpec(OnHitAbility, 1));
 	AbilitySystem->RefreshAbilityActorInfo();
-	Mesh->OnComponentHit.AddDynamic(this, &ASpikeTrap::OnHit);
+	Mesh->OnComponentHit.AddDynamic(this, &AContactTrap::OnHit);
 }
 
 // Called every frame
-void ASpikeTrap::Tick(float DeltaTime)
+void AContactTrap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-UAbilitySystemComponent* ASpikeTrap::GetAbilitySystemComponent() const
+UAbilitySystemComponent* AContactTrap::GetAbilitySystemComponent() const
 {
 	return AbilitySystem;
 }
 
-void ASpikeTrap::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+void AContactTrap::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (OtherActor)
 	{
@@ -58,7 +62,7 @@ void ASpikeTrap::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UP
 			// Lock it onto the XY-Plane
 			direction.Z = 0;
 			direction.Normalize();
-			
+
 			// Rotate it by 30 degrees (Magic Number!) "up", i.e. around the vector perpendicular to it on the XY-Plane
 			FVector directionNormal = FVector::CrossProduct(FVector::UpVector, direction);
 			direction = direction.RotateAngleAxis(30, directionNormal);

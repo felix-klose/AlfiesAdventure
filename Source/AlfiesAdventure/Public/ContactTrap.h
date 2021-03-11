@@ -1,4 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+/*
+ * Copyright(C) Felix Klose - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Felix Klose <felix.klose@felix-klose.tech>, 2021
+ */
 
 #pragma once
 
@@ -7,16 +12,16 @@
 #include "GameFramework/Actor.h"
 #include "GameplayAbilitySpec.h"
 
-#include "SpikeTrap.generated.h"
+#include "ContactTrap.generated.h"
 
 UCLASS()
-class ALFIESADVENTURE_API ASpikeTrap : public AActor, public IAbilitySystemInterface
+class ALFIESADVENTURE_API AContactTrap : public AActor, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ASpikeTrap();
+	AContactTrap();
 
 protected:
 
@@ -40,7 +45,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
