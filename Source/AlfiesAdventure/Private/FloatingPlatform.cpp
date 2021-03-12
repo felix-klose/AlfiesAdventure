@@ -29,12 +29,15 @@ void AFloatingPlatform::BeginPlay()
 	bIsMoving = false;
 	// calculate factor B in sin (B x) so we get a period of 4 * MovementTime
 	// (i.e. f(x) -> y : [0, MovementTime] -> [0, 1] where f'(x) is always positive)
-	SineFactor = (2 * UKismetMathLibrary::GetPI()) / (4 * FMath::Abs(MovementTime));
+	SineFactor = UKismetMathLibrary::GetPI() / FMath::Abs(MovementTime);
+	// Precalculate phase shift to reduce unnecessary division operations
+	PhaseShift = MovementTime / 2.0f;
 
 	StartLoctation = StartPoint->GetActorLocation();
 	MovementDirectionAndDistance = EndPoint->GetActorLocation() - StartPoint->GetActorLocation();
 
 	GetWorldTimerManager().SetTimer(PauseTimer, this, &AFloatingPlatform::StartMoving, PauseTime, false);
+
 	SetActorLocation(StartPoint->GetActorLocation());
 }
 
@@ -61,7 +64,7 @@ void AFloatingPlatform::Tick(float DeltaTime)
 			float Delta = GetRelativeLocationDelta(MovementDeltaTime);
 
 			if (MovementDirection == -1)
-				Delta = 1 - Delta;
+				Delta = 1.0f - Delta;
 
 			FVector NewLocation = StartLoctation + MovementDirectionAndDistance * Delta;
 			SetActorLocation(NewLocation);
@@ -72,12 +75,15 @@ void AFloatingPlatform::Tick(float DeltaTime)
 void AFloatingPlatform::StartMoving()
 {
 	MovementDirection *= -1;
-	MovementDeltaTime = 0;
+	MovementDeltaTime = 0.0f;
 	bIsMoving = true;
 }
 
 float AFloatingPlatform::GetRelativeLocationDelta(float Time)
 {
 	// Inline or move out
-	return FMath::Sin(SineFactor * Time);
+
+	// The sine needs to be phase shifted by one quarter of a period to the right
+	// and then adjusted to return only values between 0 and 1.
+	return (FMath::Sin(SineFactor * (Time - PhaseShift)) + 1.0f) / 2.0f;
 }

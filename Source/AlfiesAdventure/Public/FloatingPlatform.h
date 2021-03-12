@@ -37,6 +37,7 @@ protected:
 	bool bIsMoving;
 	float MovementDeltaTime;
 	float SineFactor;
+	float PhaseShift;
 	int MovementDirection;
 
 	FVector StartLoctation;
