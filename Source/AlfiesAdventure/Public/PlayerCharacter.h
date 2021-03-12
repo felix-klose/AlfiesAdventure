@@ -12,7 +12,18 @@
 #include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
 
+ // Include classes used in templates and hope for the best in regards to circular dependencies...
+#include "GameplayAbilitySpec.h"
+#include "GameplayEffect.h"
+
 #include "PlayerCharacter.generated.h"
+
+/** Accessor enum for Ability slots, used to make granting and revoking abilities for certain slots easier */
+UENUM()
+enum class EAbilitySlots : uint8
+{
+	AS_ROCKET_HOVER		UMETA(DisplayName = "Rocket Hover"),
+};
 
 UCLASS()
 class ALFIESADVENTURE_API APlayerCharacter : public ACharacter, public IAbilitySystemInterface
@@ -33,7 +44,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
-	/** Ability system component, necessary for useing GAS */
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Ability system attributes
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/** Ability system component, necessary for using GAS */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Character | Abilities", meta = (AllowPrivateAccess = "true"))
 	class UAbilitySystemComponent* AbilitySystem;
 
@@ -41,7 +56,34 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Character | Attributes", meta = (AllowPrivateAccess = "true"))
 	class UBaseAttributeSet* AttributeSet;
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Ability attributes
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Character | Abilities", meta = (AllowPrivateAccess = "true"))
+	TMap<EAbilitySlots, FGameplayAbilitySpecHandle> AbilitySlots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Abilities", meta = (AllowPrivateAccess = "true"))
+	TMap<EAbilitySlots, TSubclassOf<UGameplayAbility>> DefaultAbilities;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Abilities", meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<UGameplayEffect>> InitializationEffects;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Character | Abilities", meta = (AllowPrivateAcces = "true"))
+	bool bIsRocketHovering;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Abilities | Rocket Hover", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> FallingEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Abilities | Rocket Hover", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> LandingEffect;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Control attributes
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	FTransform DefaultMeshTransform;
+	struct FActiveGameplayEffectHandle ActiveFallingEffect;
 
 public:	
 	/** 
@@ -77,6 +119,36 @@ public:
 
 	void EnableRagdollMode();
 	void DisableRagdollMode();
+
+	/**
+		Try to activate an ability by AbilitySlot
+	*/
+	void TryActivateAbilityBySlot(EAbilitySlots Slot);
+
+	/**
+		End an ability by AbilitySlot
+	*/
+	void CancelAbilityBySlot(EAbilitySlots Slot);
+
+	/**
+		Give the character a GameplayAbility and associate it with an ability slot
+
+		@param GrantedAbility - class of the ability granted
+		@param Slot - The ability slot the granted ability will bind to
+	*/
+	void GrantAbility(TSubclassOf<class UGameplayAbility> GrantedAbility, EAbilitySlots Slot);
+
+	/**
+		Remove an ability associated with a slot from a character
+
+		@note TODO: Refactor this to work from the weapon!
+
+		@param Slot - The ability slot the revoked ability is associated with
+	*/
+	void RevokeAbility(EAbilitySlots Slot);
+
+	virtual void Landed(const FHitResult& Hit) override;
+	virtual void Falling() override;
 
 protected:
 

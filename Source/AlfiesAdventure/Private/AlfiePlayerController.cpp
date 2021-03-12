@@ -8,6 +8,7 @@
 #include "AlfiePlayerController.h"
 
 #include "GameFramework/Controller.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "PlayerCharacter.h"
 
@@ -84,7 +85,10 @@ void AAlfiePlayerController::Jump()
 
 	if (ControlledCharacter)
 	{
-		ControlledCharacter->Jump();
+		if (ControlledCharacter->GetCharacterMovement()->IsFalling())
+			ControlledCharacter->TryActivateAbilityBySlot(EAbilitySlots::AS_ROCKET_HOVER);
+		else
+			ControlledCharacter->Jump();
 	}
 }
 
@@ -98,6 +102,7 @@ void AAlfiePlayerController::StopJumping()
 	if (ControlledCharacter)
 	{
 		ControlledCharacter->StopJumping();
+		ControlledCharacter->CancelAbilityBySlot(EAbilitySlots::AS_ROCKET_HOVER);
 	}
 }
 

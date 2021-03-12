@@ -68,6 +68,19 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsRocketHovering)
+	{
+		FVector LaunchDirection = GetActorForwardVector();
+		FVector LaunchNormal = GetActorRightVector();
+		LaunchDirection = LaunchDirection.RotateAngleAxis(67.5f, LaunchNormal);
+		LaunchDirection.Z = FMath::Abs(LaunchDirection.Z);
+		LaunchDirection.Normalize();
+
+		UE_LOG(LogTemp, Warning, TEXT("LAUNCH! (%f, %f, %f)"), LaunchDirection.X, LaunchDirection.Y, LaunchDirection.Z);
+
+		LaunchCharacter(LaunchDirection * DeltaTime * 1000, false, false);
+	}
 }
 
 /**
@@ -112,6 +125,21 @@ void APlayerCharacter::BeginPlay()
 	AttributeSet->OnHealthChange.AddDynamic(this, &APlayerCharacter::OnHealthChange);
 
 	this->GetCharacterMovement()->GravityScale = 1.0f;
+
+	bIsRocketHovering = false;
+
+	// Assign default abilities
+	for (TMap<EAbilitySlots, TSubclassOf<UGameplayAbility>>::TIterator it = DefaultAbilities.CreateIterator(); it; ++it)
+	{
+		GrantAbility(it->Value, it->Key);
+	}
+
+	for (TSubclassOf<UGameplayEffect> EffectClass : InitializationEffects)
+	{
+		UClass* ResolvedEffectClass = EffectClass.Get();
+		UGameplayEffect* Effect = NewObject<UGameplayEffect>(this, ResolvedEffectClass);
+		AbilitySystem->ApplyGameplayEffectToSelf(Effect, 1.f, FGameplayEffectContextHandle());
+	}
 }
 
 void APlayerCharacter::EnableRagdollMode()
@@ -138,6 +166,68 @@ void APlayerCharacter::DisableRagdollMode()
 	GetMesh()->SetRelativeTransform(DefaultMeshTransform);
 }
 
+void APlayerCharacter::TryActivateAbilityBySlot(EAbilitySlots Slot)
+{
+	if (AbilitySlots.Contains(Slot))
+	{
+		AbilitySystem->TryActivateAbility(AbilitySlots[Slot], true);
+	}
+}
+
+void APlayerCharacter::CancelAbilityBySlot(EAbilitySlots Slot)
+{
+	if (AbilitySlots.Contains(Slot))
+	{
+		AbilitySystem->CancelAbilityHandle(AbilitySlots[Slot]);
+	}
+}
+
+void APlayerCharacter::GrantAbility(TSubclassOf<UGameplayAbility> GrantedAbility, EAbilitySlots Slot)
+{
+	if (AbilitySystem)
+	{
+		if (HasAuthority() && GrantedAbility)
+		{
+			FGameplayAbilitySpecHandle AbilitySpecHandle = AbilitySystem->GiveAbility(FGameplayAbilitySpec(GrantedAbility, 1));
+			AbilitySlots.Add(Slot, AbilitySpecHandle);
+		}
+		AbilitySystem->RefreshAbilityActorInfo();
+	}
+}
+
+void APlayerCharacter::RevokeAbility(EAbilitySlots Slot)
+{
+	if (AbilitySlots.Contains(Slot))
+	{
+		// Clear the ability first, then remove it from the slot-map
+		FGameplayAbilitySpecHandle RevokedAbilityHandle = AbilitySlots[Slot];
+		AbilitySystem->ClearAbility(RevokedAbilityHandle);
+		AbilitySlots.Remove(Slot);
+		AbilitySystem->RefreshAbilityActorInfo();
+	}
+}
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	CancelAbilityBySlot(EAbilitySlots::AS_ROCKET_HOVER);
+
+	AbilitySystem->RemoveActiveGameplayEffect(ActiveFallingEffect);
+
+	UClass* ResolvedEffectClass = FallingEffect.Get();
+	UGameplayEffect* Effect = NewObject<UGameplayEffect>(this, LandingEffect);
+	ActiveFallingEffect = AbilitySystem->ApplyGameplayEffectToSelf(Effect, 1.f, FGameplayEffectContextHandle());
+}
+
+void APlayerCharacter::Falling()
+{
+	Super::Falling();
+
+	UClass* ResolvedEffectClass = FallingEffect.Get();
+	UGameplayEffect* Effect = NewObject<UGameplayEffect>(this, ResolvedEffectClass);
+	ActiveFallingEffect = AbilitySystem->ApplyGameplayEffectToSelf(Effect, 1.f, FGameplayEffectContextHandle());
+}
+
 void APlayerCharacter::OnHealthChange(float CurValue, float MaxValue)
 {
 	// Check for death and enable ragdolls in case
@@ -146,3 +236,4 @@ void APlayerCharacter::OnHealthChange(float CurValue, float MaxValue)
 		EnableRagdollMode();
 	}
 }
+
