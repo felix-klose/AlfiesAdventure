@@ -21,28 +21,26 @@ protected:
 	class UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Floating Platform", meta = (AllowPrivateAcces = "true"))
-	TArray<AActor*> TargetActors;
+	AActor* StartPoint;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Floating Platform", meta = (AllowPrivateAcces = "true"))
-	float MaxSpeed;
+	AActor* EndPoint;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Floating Platform", meta = (AllowPrivateAcces = "true"))
-	float AccelerationTime;
+	float MovementTime;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Floating Platform", meta = (AllowPrivateAcces = "true"))
 	float PauseTime;
 
-	float AccelerationDistance;
-	float SinePeriod;
-	bool bIsAccelerating = false;
-	bool bIsBreaking = false;
-	int IndexDirection = 1;
+	FTimerHandle PauseTimer;
 
-	float CurrentAccelerationTime;
-	float CurrentSpeed;
-	int CurrentTargetIndex;
+	bool bIsMoving;
+	float MovementDeltaTime;
+	float SineFactor;
+	int MovementDirection;
 
-	FTimerHandle AccelerationTimer;
+	FVector StartLoctation;
+	FVector MovementDirectionAndDistance;
 
 public:
 	// Called every frame
@@ -52,8 +50,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void StartAccelerating();
-	void StartBreaking();
-
-	float GetDistanceToNextStop();
+	void StartMoving();
+	float GetRelativeLocationDelta(float Time);
 };

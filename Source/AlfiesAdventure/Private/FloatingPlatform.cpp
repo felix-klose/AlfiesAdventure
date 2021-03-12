@@ -15,25 +15,27 @@ AFloatingPlatform::AFloatingPlatform()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	SetRootComponent(Mesh);
+
+	// Start movement "backwards" so StartMoving can simply invert it when
+	// the platform moves for the first time
+	MovementDirection = -1;
 }
 
 // Called when the game starts or when spawned
 void AFloatingPlatform::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	SinePeriod = UKismetMathLibrary::GetPI() * 2.0f;
-	SinePeriod /= AccelerationTime * 4.0f;
 
-	AccelerationDistance = (MaxSpeed - MaxSpeed * UKismetMathLibrary::Cos(SinePeriod * AccelerationTime)) / SinePeriod;
+	bIsMoving = false;
+	// calculate factor B in sin (B x) so we get a period of 4 * MovementTime
+	// (i.e. f(x) -> y : [0, MovementTime] -> [0, 1] where f'(x) is always positive)
+	SineFactor = (2 * UKismetMathLibrary::GetPI()) / (4 * FMath::Abs(MovementTime));
 
-	GetWorldTimerManager().SetTimer(AccelerationTimer, this, &AFloatingPlatform::StartAccelerating, PauseTime, false);
+	StartLoctation = StartPoint->GetActorLocation();
+	MovementDirectionAndDistance = EndPoint->GetActorLocation() - StartPoint->GetActorLocation();
 
-	SetActorLocation(TargetActors[0]->GetActorLocation());
-	IndexDirection = 1;
-
-	float MaxTravelDistance = GetDistanceToNextStop();
-	AccelerationDistance = FMath::Min(AccelerationDistance, MaxTravelDistance / 2);
+	GetWorldTimerManager().SetTimer(PauseTimer, this, &AFloatingPlatform::StartMoving, PauseTime, false);
+	SetActorLocation(StartPoint->GetActorLocation());
 }
 
 // Called every frame
@@ -41,123 +43,41 @@ void AFloatingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsAccelerating)
+	if (bIsMoving)
 	{
-		if (CurrentAccelerationTime > AccelerationTime)
-		{
-			FVector loc = GetActorLocation();
-			float CalcAccelerationDistance = (MaxSpeed - MaxSpeed * UKismetMathLibrary::Cos(SinePeriod * AccelerationTime)) / SinePeriod;
-			CurrentSpeed = MaxSpeed;
-			bIsAccelerating = false;
-		}
-		else
-		{
-			CurrentAccelerationTime += DeltaTime;
-			CurrentSpeed = MaxSpeed * UKismetMathLibrary::Sin(SinePeriod * CurrentAccelerationTime);
-		}
-	} else if(bIsBreaking)
-	{
-		if (CurrentAccelerationTime > AccelerationTime)
-		{
-			CurrentSpeed = 0;
-			bIsBreaking = false;
+		MovementDeltaTime += DeltaTime;
 
-			FVector NextLocation;
-			if (IndexDirection == -1)
-				NextLocation = TargetActors[0]->GetActorLocation();
+		if (MovementDeltaTime > MovementTime)
+		{
+			if (MovementDirection == 1)
+				SetActorLocation(EndPoint->GetActorLocation());
 			else
-				NextLocation = TargetActors[TargetActors.Num() - 1]->GetActorLocation();
-			SetActorLocation(NextLocation);
-			GetWorldTimerManager().SetTimer(AccelerationTimer, this, &AFloatingPlatform::StartAccelerating, PauseTime, false);
+				SetActorLocation(StartPoint->GetActorLocation());
+			bIsMoving = false;
+
+			GetWorldTimerManager().SetTimer(PauseTimer, this, &AFloatingPlatform::StartMoving, PauseTime, false);
 		}
-		else
-		{
-			CurrentAccelerationTime += DeltaTime;
-			CurrentSpeed = MaxSpeed - MaxSpeed * UKismetMathLibrary::Sin(SinePeriod * CurrentAccelerationTime);
+		else {
+			float Delta = GetRelativeLocationDelta(MovementDeltaTime);
+
+			if (MovementDirection == -1)
+				Delta = 1 - Delta;
+
+			FVector NewLocation = StartLoctation + MovementDirectionAndDistance * Delta;
+			SetActorLocation(NewLocation);
 		}
-	}
-
-	if (CurrentSpeed > 0)
-	{
-		float DistanceToStop = GetDistanceToNextStop();
-
-		if (GetDistanceToNextStop() < AccelerationDistance && !bIsBreaking)
-		{
-			StartBreaking();
-		}
-
-		FVector NextLocation = TargetActors[CurrentTargetIndex]->GetActorLocation();
-		float DistanceToNextTarget = FVector::Distance(GetActorLocation(), NextLocation);
-
-		if (CurrentSpeed * DeltaTime > DistanceToNextTarget)
-		{
-
-			if (CurrentTargetIndex == 0 && IndexDirection == -1)
-			{
-				CurrentSpeed = 0;
-				bIsAccelerating = false;
-				bIsBreaking = false;
-				SetActorLocation(NextLocation);
-				GetWorldTimerManager().SetTimer(AccelerationTimer, this, &AFloatingPlatform::StartAccelerating, PauseTime, false);
-			}
-			else if (CurrentTargetIndex == TargetActors.Num() - 1 && IndexDirection == 1)
-			{
-				CurrentSpeed = 0;
-				bIsAccelerating = false;
-				bIsBreaking = false;
-				SetActorLocation(NextLocation);
-				GetWorldTimerManager().SetTimer(AccelerationTimer, this, &AFloatingPlatform::StartAccelerating, PauseTime, false);
-			}
-			else
-			{
-				CurrentTargetIndex += IndexDirection;
-				NextLocation = TargetActors[CurrentTargetIndex]->GetActorLocation();
-			}
-		}
-
-		FVector Direction = NextLocation - GetActorLocation();
-		Direction.Normalize();
-		AddActorWorldOffset(Direction * CurrentSpeed * DeltaTime);
 	}
 }
 
-void AFloatingPlatform::StartAccelerating()
+void AFloatingPlatform::StartMoving()
 {
-	bIsBreaking = false;
-	bIsAccelerating = true;
-	CurrentAccelerationTime = 0;
-
-	if (CurrentTargetIndex == TargetActors.Num() - 1)
-	{
-		CurrentTargetIndex--;
-		IndexDirection = -1;
-	}
-	else
-	{
-		CurrentTargetIndex = 1;
-		IndexDirection = 1;
-	}
+	MovementDirection *= -1;
+	MovementDeltaTime = 0;
+	bIsMoving = true;
 }
 
-void AFloatingPlatform::StartBreaking()
+float AFloatingPlatform::GetRelativeLocationDelta(float Time)
 {
-	bIsAccelerating = false;
-	bIsBreaking = true;
-	CurrentAccelerationTime = 0;
-}
-
-float AFloatingPlatform::GetDistanceToNextStop()
-{
-	FVector CurLocation = GetActorLocation();
-	float result = FVector::Distance(CurLocation, TargetActors[CurrentTargetIndex]->GetActorLocation());
-
-	int i = CurrentTargetIndex + IndexDirection;
-
-	while (i >= 0 && i <= TargetActors.Num() - 1)
-	{
-		result += FVector::Distance(TargetActors[i - IndexDirection]->GetActorLocation(), TargetActors[i]->GetActorLocation());
-		i += IndexDirection;
-	}
-
-	return result;
+	// Inline or move out
+	return FMath::Sin(SineFactor * Time);
 }
