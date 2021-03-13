@@ -79,7 +79,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 		UE_LOG(LogTemp, Warning, TEXT("LAUNCH! (%f, %f, %f)"), LaunchDirection.X, LaunchDirection.Y, LaunchDirection.Z); */
 
-		LaunchCharacter(LaunchDirection * DeltaTime * 1050, false, false);
+		LaunchCharacter(LaunchDirection * DeltaTime * 1500, false, false);
 	}
 }
 
