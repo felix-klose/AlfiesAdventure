@@ -150,6 +150,8 @@ public:
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void Falling() override;
 
+	FORCEINLINE bool IsRocketHovering() { return bIsRocketHovering; }
+
 protected:
 
 	/** 

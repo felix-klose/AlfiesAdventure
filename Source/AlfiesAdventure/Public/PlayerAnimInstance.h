@@ -33,6 +33,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Animation Properties", meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Animation Properties", meta = (AllowPrivateAccess = "true"))
+	bool bIsRocketHovering;
+
 public:
 
 	/** Initialization method for AnimInsatances */

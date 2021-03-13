@@ -8,6 +8,7 @@
 #include "PlayerAnimInstance.h"
 
 #include "GameFramework/PawnMovementComponent.h"
+#include "PlayerCharacter.h"
 
  /** Initialization method for AnimInsatances */
 void UPlayerAnimInstance::NativeInitializeAnimation()
@@ -38,5 +39,9 @@ void UPlayerAnimInstance::UpdateAnimationProperties()
 		Velocity.Z = 0.0f;
 		Speed = Velocity.Size();
 		bIsInAir = Pawn->GetMovementComponent()->IsFalling();
+
+		APlayerCharacter* Player = (APlayerCharacter*) Pawn;
+		if (Player)
+			bIsRocketHovering = Player->IsRocketHovering();
 	}
 }

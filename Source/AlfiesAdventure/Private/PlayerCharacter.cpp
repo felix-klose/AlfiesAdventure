@@ -71,15 +71,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	if (bIsRocketHovering)
 	{
-		FVector LaunchDirection = GetActorForwardVector();
-		FVector LaunchNormal = GetActorRightVector();
+		FVector LaunchDirection = GetActorUpVector();
+		/* FVector LaunchNormal = GetActorRightVector();
 		LaunchDirection = LaunchDirection.RotateAngleAxis(67.5f, LaunchNormal);
 		LaunchDirection.Z = FMath::Abs(LaunchDirection.Z);
 		LaunchDirection.Normalize();
 
-		UE_LOG(LogTemp, Warning, TEXT("LAUNCH! (%f, %f, %f)"), LaunchDirection.X, LaunchDirection.Y, LaunchDirection.Z);
+		UE_LOG(LogTemp, Warning, TEXT("LAUNCH! (%f, %f, %f)"), LaunchDirection.X, LaunchDirection.Y, LaunchDirection.Z); */
 
-		LaunchCharacter(LaunchDirection * DeltaTime * 1000, false, false);
+		LaunchCharacter(LaunchDirection * DeltaTime * 1050, false, false);
 	}
 }
 
