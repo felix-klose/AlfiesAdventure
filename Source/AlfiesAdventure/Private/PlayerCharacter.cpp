@@ -35,7 +35,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// Setup camera springarm boom
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->SetupAttachment(GetMesh());
 	CameraBoom->TargetArmLength = 600.0f;
 	// Orient camera to control rotation (actor rotation, not mesh rotation)
 	CameraBoom->bUsePawnControlRotation = true;
@@ -72,12 +72,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	if (bIsRocketHovering)
 	{
 		FVector LaunchDirection = GetActorUpVector();
-		/* FVector LaunchNormal = GetActorRightVector();
-		LaunchDirection = LaunchDirection.RotateAngleAxis(67.5f, LaunchNormal);
-		LaunchDirection.Z = FMath::Abs(LaunchDirection.Z);
-		LaunchDirection.Normalize();
-
-		UE_LOG(LogTemp, Warning, TEXT("LAUNCH! (%f, %f, %f)"), LaunchDirection.X, LaunchDirection.Y, LaunchDirection.Z); */
 
 		LaunchCharacter(LaunchDirection * DeltaTime * 1500, false, false);
 	}
@@ -126,6 +120,8 @@ void APlayerCharacter::BeginPlay()
 
 	this->GetCharacterMovement()->GravityScale = 1.0f;
 
+	bIsRagdollEnabled = false;
+
 	bIsRocketHovering = false;
 
 	// Assign default abilities
@@ -144,26 +140,35 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::EnableRagdollMode()
 {
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-	GetMesh()->SetSimulatePhysics(true);
+	if (!bIsRagdollEnabled)
+	{
+		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+		GetMesh()->SetSimulatePhysics(true);
 
-	AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->DisablePlayerInput();
+		AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
+		GameMode->DisablePlayerInput();
 
-	GetCharacterMovement()->DisableMovement();
+		GetCharacterMovement()->DisableMovement();
+		bIsRagdollEnabled = true;
+	}
 }
 
 void APlayerCharacter::DisableRagdollMode()
 {
-	GetMesh()->SetSimulatePhysics(false);
-	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
+	if (bIsRagdollEnabled)
+	{
+		GetMesh()->SetSimulatePhysics(false);
+		GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 
-	AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
-	GameMode->EnablePlayerInput();
+		AAlfiesAdventureGameModeBase* GameMode = (AAlfiesAdventureGameModeBase*)GetWorld()->GetAuthGameMode();
+		GameMode->EnablePlayerInput();
 
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
-	GetMesh()->SetRelativeTransform(DefaultMeshTransform);
+		SetActorLocation(GetMesh()->GetComponentLocation());
+		GetMesh()->SetRelativeTransform(DefaultMeshTransform);
+		bIsRagdollEnabled = false;
+	}
 }
 
 void APlayerCharacter::TryActivateAbilityBySlot(EAbilitySlots Slot)

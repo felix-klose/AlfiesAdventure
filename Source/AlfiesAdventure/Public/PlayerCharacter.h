@@ -84,7 +84,7 @@ protected:
 
 	FTransform DefaultMeshTransform;
 	struct FActiveGameplayEffectHandle ActiveFallingEffect;
-
+	bool bIsRagdollEnabled;
 public:	
 	/** 
 	* Main Update function called every frame
